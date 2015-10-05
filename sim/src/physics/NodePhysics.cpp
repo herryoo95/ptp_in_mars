@@ -809,20 +809,22 @@ namespace mars {
       unsigned long size;
       int x, y;
       terrain = node->terrain;
-/* //this is to test MLS heightfield
+ //this is to test MLS heightfield
       terrain->height =140;
       terrain->width =140;     
- */     
+     
       size = terrain->width*terrain->height;      
       if(!height_data) height_data = (dReal*)calloc(size, sizeof(dReal));
-      
+
+/* origin      
       for(x=0; x<terrain->height; x++) {
         for(y=0; y<terrain->width; y++) {
           height_data[(terrain->height-(x+1))*terrain->width+y] = (dReal)terrain->pixelData[x*terrain->width+y];
         }
       }
+*/
 
-/* //this code is to test MLS Heightfield object 			
+//this code is to test MLS Heightfield object 			
 	char *ptr;
 	char *err;
 	double f;
@@ -858,16 +860,16 @@ namespace mars {
        for(x=0; x<terrain->height; x++) {
         for(y=0; y<terrain->width; y++) {
           
-         // height_data[x*terrain->width+y] = mls_mean[count];   
-          height_data[(terrain->height-(x+1))*terrain->width+y] = mls_mean[count];    
-          //printf("(%f %f),",mls_mean[count],(dReal)terrain->pixelData[x*terrain->width+y]);
-		  count++;
+          height_data[(terrain->height-(x+1))*terrain->width+y] = mls_mean[x*terrain->width+(terrain->width-y)];          
+          //height_data[(terrain->height-(x+1))*terrain->width+y] = mls_mean[count];   
+          printf("++(%d %d)###",x*terrain->width+y, count);  
+          count++;
+
         }
       }  
-   //      printf("before...(%d %d) (%f) (%f %f)######\n",terrain->width, terrain->height, terrain->scale, 
- //      terrain->targetWidth,terrain->targetHeight);      
    
- /// unitl here the test code is  */  
+   
+ /// unitl here the test code is    
  
 
       // build the ode representation
@@ -1373,11 +1375,11 @@ namespace mars {
     }
 
     dReal NodePhysics::heightCallback(int x, int y) {
-	/*	//this is to test mls heightfield  
+		//this is to test mls heightfield  
 		terrain->width =140;
 		terrain->scale = 1;	
-	*/
-      return (dReal)height_data[(y*terrain->width)+x]*terrain->scale;
+	
+      return (dReal)height_data[y*terrain->width+x]*terrain->scale;
     }
 
     void NodePhysics::setContactParams(contact_params& c_params) {
