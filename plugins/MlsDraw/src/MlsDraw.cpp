@@ -102,9 +102,9 @@ namespace mars {
           
           pos.x() = (double)x*0.1f;
           pos.y() = (double)y*0.1f;
-          pos.z() = (double)mls_mean[count++];
+          pos.z() = (double)mls_mean[x*width+(width-y)];
         //  printf("(%d %d %f),",x,y,mls_mean[count++]);
-		  //count++;
+		  count++;
  
       
 	   //should exchange x and y like height_dat array	  
