@@ -164,6 +164,7 @@ namespace mars {
 
       
       // manipulation
+      void withdrawCollision(); //for soil dynamics
       void update(interfaces::sReal calc_ms, bool physics_thread = true); ///< Updates the values of the node from the physical layer.
       void rotateAtPoint(const utils::Vector &rotation_point, const utils::Quaternion &rotation, bool move_group);
       void changeNode(interfaces::NodeData *node);

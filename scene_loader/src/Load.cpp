@@ -54,7 +54,7 @@ namespace mars {
       control(c), tmpPath(tmpPath_) {
     	mFileSuffix = utils::getFilenameSuffix(mFileName);
     }
-
+  
     unsigned int Load::load() {
 
       if(!prepareLoad()) return 0;
@@ -75,6 +75,8 @@ namespace mars {
       if(mRobotName != ""){
         control->entities->addEntity(mRobotName);
       }
+      
+      printf("%s", mRobotName);
 
       // need to unzip into a temporary directory
       if (mFileSuffix == ".scn" || mFileSuffix == ".zip") {

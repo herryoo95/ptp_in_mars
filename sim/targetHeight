@@ -1,0 +1,26 @@
+src/core/NodeManager.cpp:          if(!reloadNode.terrain->pixelData) {
+src/core/NodeManager.cpp:        if(!nodeS->terrain->pixelData) {
+src/core/NodeManager.cpp:          if(!nodeS->terrain->pixelData) {
+src/core/NodeManager.cpp:      newNode.name = terrain->name;
+src/core/NodeManager.cpp:      newNode.filename = terrain->srcname;
+src/core/NodeManager.cpp:      newNode.ext = Vector(terrain->targetWidth, terrain->targetHeight,
+src/core/NodeManager.cpp:                           terrain->scale);
+src/core/NodeManager.cpp:      newNode.material = terrain->material;
+src/core/NodeManager.cpp:          tmp.terrain->pixelData = (double*)calloc((tmp.terrain->width*
+src/core/NodeManager.cpp:                                                     tmp.terrain->height),
+src/core/NodeManager.cpp:          memcpy(tmp.terrain->pixelData, iter->terrain->pixelData,
+src/core/NodeManager.cpp:                 (tmp.terrain->width*tmp.terrain->height)*sizeof(double));
+src/core/SimNode.cpp:        if(sNode.terrain->pixelData) free(sNode.terrain->pixelData);
+src/physics/NodePhysics.cpp:      size = terrain->width*terrain->height;
+src/physics/NodePhysics.cpp:      for(x=0; x<terrain->height; x++) {
+src/physics/NodePhysics.cpp:        for(y=0; y<terrain->width; y++) {
+src/physics/NodePhysics.cpp:          height_data[(terrain->height-(x+1))*terrain->width+y] = (dReal)terrain->pixelData[x*terrain->width+y];
+src/physics/NodePhysics.cpp:                                        terrain->targetWidth,
+src/physics/NodePhysics.cpp:                                        terrain->targetHeight,
+src/physics/NodePhysics.cpp:                                        terrain->width, terrain->height,
+src/physics/NodePhysics.cpp:      printf("++ %d %d %d %d ++\n", terrain->targetWidth,
+src/physics/NodePhysics.cpp:		terrain->targetHeight,terrain->width, terrain->height);
+src/physics/NodePhysics.cpp:      dGeomHeightfieldDataSetBounds(heightid, REAL(-terrain->scale*2.0),
+src/physics/NodePhysics.cpp:                                    REAL(terrain->scale*2.0));
+src/physics/NodePhysics.cpp:      //dGeomHeightfieldDataSetBounds(heightid, -terrain->scale, terrain->scale);
+src/physics/NodePhysics.cpp:      return (dReal)height_data[(y*terrain->width)+x]*terrain->scale;

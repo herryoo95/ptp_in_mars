@@ -1,0 +1,10 @@
+prefix=/home/dfki.uni-bremen.de/yoo/mars_dev/install
+exec_prefix=/home/dfki.uni-bremen.de/yoo/mars_dev/install
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: ptpSoil
+Description: soil
+Version: 1.0
+Libs: -L${libdir} -lptpSoil
+Cflags: -I${includedir}

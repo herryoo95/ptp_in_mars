@@ -513,6 +513,22 @@ namespace mars {
       if(control->graphics)
         control->graphics->setDrawObjectMaterial(graphics_id,sNode.material);
     }
+    
+    void SimNode::withdrawCollision() {
+ 
+//      const Vector NodePhysics::setPosition(const Vector &pos, bool move_group) {
+//	    const Quaternion NodePhysics::setRotation(const Quaternion &q, bool move_group) {
+//      void NodePhysics::setLinearVelocity(const Vector &velocity) {	
+//      void NodePhysics::setAngularVelocity(const Vector &velocity) {
+
+        //withdraw physics before the collision 					
+		my_interface->setPosition(sNode.pos, true);		
+		my_interface->setRotation(sNode.rot, false);
+		my_interface->setLinearVelocity(l_vel);
+		my_interface->setAngularVelocity(a_vel);		
+		printf("num+++++++++++++++ \n");			
+  
+  }
 
     /**
      * pre:

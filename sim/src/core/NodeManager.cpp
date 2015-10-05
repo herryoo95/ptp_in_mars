@@ -43,6 +43,7 @@
 #include <stdexcept>
 
 #include <mars/utils/MutexLocker.h>
+//#include "../ptpSoil/PtpSoil.h"
 
 namespace mars {
   namespace sim {
@@ -178,6 +179,8 @@ namespace mars {
       if(! (nodeS->noPhysical)){
         // create an interface object to the physics
         NodeInterface *newNodeInterface = PhysicsMapper::newNodePhysics(control->sim->getPhysics());
+        SimNode *test = getSimNode(nodeS->index);  //ptp 
+
         if (!newNodeInterface->createNode(nodeS)) {
           // if no node was created in physics
           // delete the objects
@@ -700,10 +703,7 @@ namespace mars {
         aacc = iter->second->getAngularAcceleration();
       return aacc;
     }
-
-
-
-
+    
     /**
      *\brief Sets the rotation of the node with the given id.
      */
@@ -1145,6 +1145,15 @@ namespace mars {
       }
     }
 
+    // brief withdraw the physics before the collision.
+ 
+    void NodeManager::withdrawDynamicNodes() {
+      MutexLocker locker(&iMutex);
+      NodeMap::iterator iter;
+      for(iter = simNodesDyn.begin(); iter != simNodesDyn.end(); iter++) {
+        iter->second->withdrawCollision();
+      }
+    }
 
     /**
      *\brief Updates the Node values of dynamical nodes from the physics.
@@ -1583,6 +1592,92 @@ namespace mars {
         }
       }
     }
+    
+
+    VectorN NodeManager::getParticleSize(const int foot_id) {   // return x,y,z 
+		
+		VectorN soilsize(0,0,0);
+
+		list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ){	
+			soilsize.x() = iter->ptp.n.x;
+			soilsize.y() = iter->ptp.n.y;
+			soilsize.z() = iter->ptp.n.z;	
+		}else{ 			
+			soilsize.x() = 0;
+			soilsize.y() = 0;
+			soilsize.z() = 0;}
+		
+		return soilsize;
+	}
+    
+    Vector NodeManager::getParticlePosition(const int foot_id, const int i, 
+	const int j, const int k) {
+		Vector particle_pos(0.f,0.f,0.f);
+		list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ){		
+			particle_pos.x() = iter->particle[i][j][k].loc.x;
+			particle_pos.y() = iter->particle[i][j][k].loc.y;
+			particle_pos.z() = iter->particle[i][j][k].loc.z;
+		}else{ printf("Error...\n"); }
+		return particle_pos;
+	}
+
+	void NodeManager::pushPTPlist(const int foot_id, PTPInterface* soil){  //ptp
+		footsoil[foot_id].push_front( *soil );
+	}
+
+	bool NodeManager::popPTPlist(const int foot_id){  //ptp
+		footsoil[foot_id].clear();	
+		return true;
+	}	
+
+	bool NodeManager::collideOnSoil(const int foot_id, bool isMaxForceNow){  //ptp
+		std::list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		std::list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ) {
+			iter->collidePTP(isMaxForceNow);
+			return	true;	}
+		else return false;	
+	}	
+	bool NodeManager::setFootPosition(const int foot_id, Vector obj_pos){  //ptp
+		std::list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		std::list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ) {
+			iter->vfoot.loc = obj_pos*M2MM;
+			return	true;	}
+		else return false;	
+	}
+	bool NodeManager::setFootVelocity(const int foot_id, Vector obj_vel){  //ptp
+		std::list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		std::list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ) {
+			iter->vfoot.vel = obj_vel*M2MM;
+			return	true;	}
+		else return false;	
+	}	
+	bool NodeManager::setFootRadius(const int foot_id, double obj_radius){  //ptp
+		std::list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		std::list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ) {
+			iter->vfoot.r = obj_radius*M2MM;
+		//	printf(" vfoot radius ... %f\n", iter->vfoot.r);	
+			return	true;	}
+		else return false;	
+	}	
+	Vector NodeManager::getSoilContactForce(const int foot_id){  //ptp
+		
+		Vector result(0.f,0.f,0.f);
+		std::list< PTPInterface >::iterator iterEnd = footsoil[foot_id].end();
+		std::list< PTPInterface >::iterator iter = footsoil[foot_id].begin(); 
+		if(iter != iterEnd ) {
+			result = iter->contactForce;
+	//		printf(" getSilContactForce .z() = %f\n", contact_force.z());			
+			return	result;	}
+		else return result;	
+	}	
 
   } // end of namespace sim
 } // end of namespace mars

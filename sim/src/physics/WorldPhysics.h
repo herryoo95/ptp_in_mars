@@ -40,7 +40,22 @@
 #include <mars/interfaces/sim_common.h>
 #include <mars/interfaces/sim/ControlCenter.h>
 #include <mars/interfaces/sim/PhysicsInterface.h>
+#include <mars/interfaces/sim/NodeManagerInterface.h>
 #include <mars/interfaces/graphics/draw_structs.h>
+#include "../core/SimNode.h"
+#include "../ptpSoil/PTPInterface.hpp"
+
+
+
+#include <osg/Node>
+#include <osg/Group>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/Texture2D>
+#include <osgDB/ReadFile> 
+#include <osgViewer/Viewer>
+#include <osg/PositionAttitudeTransform>
+#include <osgGA/TrackballManipulator>
 
 #include <vector>
 
@@ -48,7 +63,7 @@
 
 namespace mars {
   namespace sim {
-
+	  
     class NodePhysics;
 
     /**
@@ -106,10 +121,33 @@ namespace mars {
       int handleCollision(dGeomID theGeom);
       interfaces::sReal getCollisionDepth(dGeomID theGeom);
       mutable utils::Mutex iMutex;
+      
+      void buildNewSoil(const int foot_id, const Vector obj_pos, const Vector obj_vel, dBodyID body1, 
+			interfaces::NodeId surfaceID); 
 
       static interfaces::PhysicsError error;
 
     private:
+    
+    	//vFOOT foot[6];
+		//Vector forceR[6];
+		//Vector last_outF[6];
+		//PTPInterface* soil;
+	    //std::list< PTPInterface > ptplist;		
+		bool first_colliding[6];
+		bool heightMap_collision[6];
+		int collideCount, prev_collideCount;
+		double foot_radius;
+		bool onCalCollision;
+		Vector soilForce[6], outF[6], soilForce_all;
+		double end_soil[6];
+		unsigned int node_id;
+		bool isMaxForceNow[6];
+		//int foot_id;
+		//dGeomID surface
+		bool collided103;
+		
+    
       utils::Mutex drawLock;
       dSpaceID space;
       dWorldID world;

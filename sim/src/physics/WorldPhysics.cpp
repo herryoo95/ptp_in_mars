@@ -46,6 +46,8 @@
 #include <mars/interfaces/sim/SimulatorInterface.h>
 #include <mars/interfaces/Logging.hpp>
 
+#include "../../../plugins/PTPGraphics/src/PTPGraphics.h"
+
 namespace mars {
   namespace sim {
 
@@ -83,7 +85,6 @@ namespace mars {
      *      - world, space, contactgroup and world_init to false (0)
      */
     WorldPhysics::WorldPhysics(ControlCenter *control) {
-
       this->control = control;
       draw_contact_points = 0;
       fast_step = 0;
@@ -100,6 +101,17 @@ namespace mars {
       num_contacts = 0;
       create_contacts = 1;
       log_contacts = 0;
+      
+      for(int i=0;i<6;i++) first_colliding[i] = true;
+      for(int i=0;i<6;i++) heightMap_collision[i] = false;    
+      for(int i=0;i<6;i++) isMaxForceNow[i] = false;     
+		  
+      collideCount = 0;
+      prev_collideCount = 0;
+      foot_radius = 0.025958;
+      onCalCollision = false;
+      
+      collided103 = false;
 
       // the step size in seconds
       step_size = 0.01;
@@ -116,6 +128,8 @@ namespace mars {
       dSetErrorHandler (myErrorFunction);
       dSetDebugHandler (myDebugFunction);
       dSetMessageHandler (myMessageFunction);
+      
+
     }
 
     /**
@@ -267,7 +281,7 @@ namespace mars {
         num_contacts = log_contacts = 0;
         create_contacts = 1;
         dSpaceCollide(space,this, &WorldPhysics::callbackForward);
-        
+                
         drawLock.lock();
         draw_extern.swap(draw_intern);
         drawLock.unlock();
@@ -276,6 +290,16 @@ namespace mars {
         try {
           if(fast_step) dWorldQuickStep(world, step_size);
           else dWorldStep(world, step_size);
+         
+    //if(collided103){ 
+    //dJointGroupEmpty (contactgroup);			
+	//control->nodes->withdrawDynamicNodes(); 
+	
+	//if(fast_step) dWorldQuickStep(world, step_size);
+    //else dWorldStep(world, step_size);
+    //collided103 = false;
+	
+	//}      
         } catch (...) {
           control->sim->handleError(PHYSICS_UNKNOWN);
         }
@@ -415,6 +439,122 @@ namespace mars {
       return step_size;
     }
 
+
+void WorldPhysics::buildNewSoil(const int foot_id, const Vector obj_pos, const Vector obj_vel, 
+				dBodyID body1, interfaces::NodeId surfaceID){
+	    //dBodyID body1 = body;
+		//printf("############footID = %d %d new soil\n",foot_id, first_colliding[foot_id]); 		
+	if(first_colliding[foot_id]){// && obj_pos.x() > 0.6) {
+		printf("################################################## footID = %d new soil\n",foot_id); 		
+		first_colliding[foot_id] = false;
+		heightMap_collision[foot_id] = true;
+		
+		VectorN num;  //number of particles in a soil
+		Vector start;
+		Vector end;
+		num.x() = 40;
+		num.y() = 40;
+		num.z() = 30;
+		
+		double soildepth = foot_radius*4;
+		start.x() = (obj_pos.x() - foot_radius*4)*M2MM;
+		start.y() = (obj_pos.y() - foot_radius*4)*M2MM;
+		start.z() = (obj_pos.z() - foot_radius*2 - soildepth)*M2MM;//-310;
+		end.x() = (obj_pos.x() + foot_radius*4)*M2MM;
+		end.y() = (obj_pos.y() + foot_radius*4)*M2MM;
+		end.z() = (obj_pos.z() - foot_radius*2)*M2MM;//-210;
+		end_soil[foot_id] = end.z()*MM2M;
+		PTPInterface* soil = new PTPInterface(num.x(),num.y(),num.z());
+		//soil->buildPTP(&num,&start,&end);
+		
+		SimNode* simnode = control->nodes->getSimNode(surfaceID);    //TODO: attach current NodeId of heightmap
+		NodeInterface* nodeInterface = simnode->getInterface();		
+		
+		soil->buildPTP(&num,&start,&end,nodeInterface);		
+		soil->vfoot.type = SPHERE;
+		control->nodes->pushPTPlist(foot_id,soil);      //save it into the container
+
+
+	}
+	if(heightMap_collision[foot_id]){       //if the soil has been built
+		control->nodes->setFootPosition(foot_id, obj_pos);
+		control->nodes->setFootVelocity(foot_id, obj_vel);	    
+		control->nodes->setFootRadius(foot_id, foot_radius);	    
+		 if(!control->nodes->collideOnSoil(foot_id, isMaxForceNow[foot_id])){printf("ERRRROR\n");}
+		 else {
+			 Vector othersF;
+			 
+			//control->nodes->getSoilContactForce(foot_id);	
+			outF[foot_id] = control->nodes->getSoilContactForce(foot_id);	
+			
+			//printf("outF... %d (%f %f %f)\n", foot_id, outF[foot_id].x(), outF[foot_id].y(), outF[foot_id].z());
+			outF[foot_id].z() = ABS(outF[foot_id].z());
+			
+			//static double x1, x2, y;
+			//y= (outF.z() + x1*2.f + x2)/4.f;
+			//x2=x1;
+			//x1=outF.z();
+
+			//printf("soilForce..(%f %f %f %f %f %f)(%f)\n", soilForce[0].z(),soilForce[1].z(),
+			//soilForce[2].z(),soilForce[3].z(),soilForce[4].z(),soilForce[5].z(),soilForce_all.z());
+			//max = 240 - all
+			//for(int i=0;i<6;i++){
+				//if(i != foot_id) othersF += soilForce[i]; 
+				////soilForce_all =soilForce[0]+soilForce[1]+soilForce[2]+soilForce[3]+soilForce[4]+soilForce[5];	
+			//}	
+			//printf("othersF---%f\n", othersF.z());
+			//Vector maxForce(10.f, 10.f, 140.f), minForce(-10.f,-10.f,-140.f);
+			Vector maxForce(80.f, 80.f, 85.f), minForce(-80.f,-80.f,-85.f);	
+			//if(othersF.z()<=250.f) maxForce.z() = 250.f - othersF.z();
+			//else maxForce.z() = 0.f;
+					
+			//if(ABS(outF[foot_id].z()) <= maxForce.z()){
+				//outF[foot_id].z() = outF[foot_id].z();
+				//isMaxForceNow[foot_id] = false;
+			//}
+			//else if(outF[foot_id].z() > maxForce.z()){
+				//outF[foot_id].z() = maxForce.z();
+				//isMaxForceNow[foot_id] = true;
+			//}
+			//else if(outF[foot_id].z() < minForce.z()){
+				//outF[foot_id].z() = minForce.z();	
+				//isMaxForceNow[foot_id] = true;				
+			//}
+			if(ABS(outF[foot_id].z()) <= maxForce.z()) outF[foot_id].z() = outF[foot_id].z();
+			else if(outF[foot_id].z() > maxForce.z()) outF[foot_id].z() = maxForce.z();
+			else if(outF[foot_id].z() < minForce.z()) outF[foot_id].z() = minForce.z();
+						
+			if(ABS(outF[foot_id].x()) <= maxForce.x()) outF[foot_id].x() = outF[foot_id].x();
+			else if(outF[foot_id].x() > maxForce.x()) outF[foot_id].x() = maxForce.x();
+			else if(outF[foot_id].x() < minForce.x()) outF[foot_id].x() = minForce.x();
+			
+			if(ABS(outF[foot_id].y()) <= maxForce.y()) outF[foot_id].y() = outF[foot_id].y();
+			else if(outF[foot_id].y() > maxForce.y()) outF[foot_id].y() = maxForce.y();
+			else if(outF[foot_id].y() < minForce.y()) outF[foot_id].y() = minForce.y();		
+			
+			static Vector x1,x2,x3,x4,x5,x6,x7,x8,y,y1,y2,y3;
+			//static double x1,x2,x3,x4,x5,x6,x7,x8,y,y1,y2,y3;			
+			//y = (lpf.z() + x1);
+			y3 = (outF[foot_id] + x1*2.f + x2)/4.f;	
+			//y2= (lpf.z() + x1 + x2 + x3 + x4)/5;		
+			//y3 = (outF + x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8)/3.f;								
+			x7=x8;
+			x6=x5;
+			x5=x4;
+			x4=x3;
+			x3=x2;
+			x2=x1;
+			x1=outF[foot_id];		
+
+			dBodyAddForce(body1,-(dReal)y3.x(), -(dReal)y3.y(), (dReal)y3.z());				
+			//dBodyAddForce(body1,-(dReal)outF.x(), -(dReal)outF.y(), (dReal)y3);//outF.z());	
+			
+		//	printf("contact force %d (%f %f %f)\n", foot_id, -(dReal)y3.x(), -(dReal)y3.y(), (dReal)y3.z());	
+		}
+	 }
+	
+} 
+
     /**
      * \brief In this function the collision handling from ode is performed.
      *
@@ -453,8 +593,111 @@ namespace mars {
       geom_data* geom_data1 = (geom_data*)dGeomGetData(o1);
       geom_data* geom_data2 = (geom_data*)dGeomGetData(o2);
 
-            // test if we have a ray sensor:
-      if(geom_data1->ray_sensor) {
+
+		//delet soil when foot position is higher than THRESHOLD
+		Vector footpos;
+				switch (geom_data1->id){							
+					case 34:
+							if(first_colliding[0] == false){  
+							footpos = control->nodes->getPosition(34);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[0]) {
+		printf("%+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			0, first_colliding[0], footpos.z() + DEL_SOIL_THRESHOLD, end_soil[0]);		
+							first_colliding[0] = true;
+							heightMap_collision[0] = false;
+							control->nodes->popPTPlist(0);
+							outF[0].x() = 0.f;
+							outF[0].y() = 0.f;
+							outF[0].z() = 0.f;
+		//printf("%lu.. first_colliding....reset (%f %f)\n", geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[0]);
+							}}
+							break;
+					case 48: 
+							if(first_colliding[1] == false){  
+							footpos = control->nodes->getPosition(48);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[1]) {
+		printf("+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			1, first_colliding[1], footpos.z()+DEL_SOIL_THRESHOLD, end_soil[1]);		
+							first_colliding[1] = true;
+							heightMap_collision[1] = false;
+							control->nodes->popPTPlist(1);
+							outF[1].x() = 0.f;
+							outF[1].y() = 0.f;
+							outF[1].z() = 0.f;						
+		//printf("%lu.. first_colliding....reset (%f %f)\n",
+		//geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[1]);
+							}}
+							break;
+					case 61: 
+							if(first_colliding[2] == false){  
+							footpos = control->nodes->getPosition(61);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[2]) {
+		printf("+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			2, first_colliding[2], footpos.z()+DEL_SOIL_THRESHOLD, end_soil[2]);		
+							first_colliding[2] = true;
+							heightMap_collision[2] = false;
+							control->nodes->popPTPlist(2);
+							outF[2].x() = 0.f;
+							outF[2].y() = 0.f;
+							outF[2].z() = 0.f;						
+		//printf("%lu.. first_colliding....reset (%f %f)\n",
+		//geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[2]);
+							}}
+							break;
+					case 73:  
+							if(first_colliding[3] == false){  
+							footpos = control->nodes->getPosition(73);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[3]) {
+		printf("+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			3, first_colliding[3], footpos.z()+DEL_SOIL_THRESHOLD, end_soil[3]);		
+							first_colliding[3] = true;
+							heightMap_collision[3] = false;
+							control->nodes->popPTPlist(3);
+							outF[3].x() = 0.f;
+							outF[3].y() = 0.f;
+							outF[3].z() = 0.f;						
+		//printf("%lu.. first_colliding....reset (%f %f)\n",
+		//geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[3]);
+							}}
+							break;
+					case 87:  
+							if(first_colliding[4] == false){  
+							footpos = control->nodes->getPosition(87);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[4]) {
+		printf("+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			4, first_colliding[4], footpos.z()+DEL_SOIL_THRESHOLD, end_soil[4]);		
+							first_colliding[4] = true;
+							heightMap_collision[4] = false;
+							control->nodes->popPTPlist(4);
+							outF[4].x() = 0.f;
+							outF[4].y() = 0.f;
+							outF[4].z() = 0.f;							
+		//printf("%lu.. first_colliding....reset (%f %f)\n",
+		//geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[4]);
+							}}
+							break;
+					case 99:  
+							if(first_colliding[5] == false){  
+							footpos = control->nodes->getPosition(99);
+							if((footpos.z()+DEL_SOIL_THRESHOLD) > end_soil[5]) {
+		printf("+++++++++++++++++deleted+++++++++++++++++++foot %d %d (%f %f)..over..over\n", 
+			5, first_colliding[5], footpos.z()+DEL_SOIL_THRESHOLD, end_soil[5]);		
+							first_colliding[5] = true;
+							heightMap_collision[5] = false;
+							control->nodes->popPTPlist(5);
+							outF[5].x() = 0.f;
+							outF[5].y() = 0.f;
+							outF[5].z() = 0.f;							
+		//printf("%lu.. first_colliding....reset (%f %f)\n",
+		//geom_data1->id, footpos.z()+DEL_SOIL_THRESHOLD, end_soil[5]);
+							}}
+							break;
+					default: break;	
+					
+				}
+		
+
+	  if(geom_data1->ray_sensor) {
         dContact contact;
         if(geom_data1->parent_geom == o2) {
           return;
@@ -655,7 +898,59 @@ namespace mars {
       }
 
       numc=dCollide(o1,o2, maxNumContacts, &contact[0].geom,sizeof(dContact));
-      if(numc){ 
+    if(numc){ 
+		
+      //node_id = control->nodes->getID("terrain_0_0");     
+	if(geom_data2->id == 102) {		//this id is heightmap NodeID
+//	if(geom_data2->height_field && geom_data2->id != 103) {		
+		//start to detect PTP collision
+		dBodyID body1=dGeomGetBody(o1);
+		int foot_id = 0;
+		
+		const dReal* body_pos = dBodyGetPosition(body1);
+		const dReal* body_vel = dBodyGetLinearVel(body1);
+		Vector obj_pos, obj_vel;
+		
+		obj_pos.x() = (sReal)body_pos[0];
+		obj_pos.y() = (sReal)body_pos[1];
+		obj_pos.z() = (sReal)body_pos[2];
+		
+		obj_vel.x() = (sReal)body_vel[0];
+		obj_vel.y() = (sReal)body_vel[1];
+		obj_vel.z() = (sReal)body_vel[2];
+
+
+	//   printf("before switch... geom_data2->id = %lu\n", geom_data1->id);	
+				
+switch(geom_data1->id){
+case 34:	foot_id = 0;
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+case 48:	foot_id = 1;
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+case 61:	foot_id = 2;
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+case 73:	foot_id = 3;
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+case 87:	foot_id = 4;
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+case 99:	foot_id = 5;		
+			buildNewSoil(foot_id, obj_pos, obj_vel, body1, geom_data2->id);
+break;
+default: //printf("Did not find foot_id\n");
+break;
+}		
+  } else { 	   // printf("normal...collided \n");		
+   //   if(numc){ 
+
+//printf("----collided---%d-(%d %d) (%f %f %f)\n", numc, o1,o2,
+//contact[0].geom.pos[0],contact[0].geom.pos[1],contact[0].geom.pos[2]);
+if(geom_data2->id == 103) collided103 = true;
+	  	  
         dJointFeedback *fb;
         draw_item item;
         Vector contact_point;
@@ -734,11 +1029,21 @@ namespace mars {
               geom_data1->node1 = true;
             }
           }
-        }
-      }
-      delete[] contact;
-    }
+        }  
+    if(geom_data2->id == 103) {	
+  
+    //withdraw the collision 
+	printf("----collided---%d-(%d %d) (%f %f %f)\n", numc, o1,o2,
+			contact[0].geom.pos[0],contact[0].geom.pos[1],contact[0].geom.pos[2]);	
+			
 
+ } 
+	  }
+	  
+	  
+	}
+      delete[] contact;
+	}
     /**
      * \brief This static function is used to project a normal function
      *   pointer to a method from a class
@@ -752,6 +1057,7 @@ namespace mars {
     void WorldPhysics::callbackForward(void *data, dGeomID o1, dGeomID o2) {
       WorldPhysics *wp = (WorldPhysics*)data;
       wp->nearCallback(o1, o2);
+
     }
 
     /**
@@ -832,6 +1138,19 @@ namespace mars {
           drawItems->push_back(*iter);
         }
       }
+
+		//soilForce[0] = control->nodes->getContactForce(34) + outF[0];   //ptp
+		//soilForce[1] = control->nodes->getContactForce(48) + outF[1];
+		//soilForce[2] = control->nodes->getContactForce(61) + outF[2];
+		//soilForce[3] = control->nodes->getContactForce(73) + outF[3];
+		//soilForce[4] = control->nodes->getContactForce(87) + outF[4];
+		//soilForce[5] = control->nodes->getContactForce(99) + outF[5];
+		//soilForce_all =soilForce[0]+soilForce[1]+soilForce[2]+soilForce[3]+soilForce[4]+soilForce[5];			
+
+			//printf("soilForce..(%f %f %f %f %f %f)(%f)\n", soilForce[0].z(),soilForce[1].z(),
+			//soilForce[2].z(),soilForce[3].z(),soilForce[4].z(),soilForce[5].z(),soilForce_all.z());
+		
+	
     }
 
     int WorldPhysics::handleCollision(dGeomID theGeom) {

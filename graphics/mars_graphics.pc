@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=/usr/local
+libdir=${prefix}/lib
+includedir=${prefix}/include/
+
+Name: mars_graphics
+Description: The DFKI Robot Simulator
+Version: 1.0
+Requires.private: mars_interfaces opencv lib_manager cfg_manager
+Libs: -L${libdir} -lmars_graphics
+
+Cflags: -I${includedir}

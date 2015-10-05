@@ -42,6 +42,8 @@
 #include <mars/utils/Vector.h>
 #include <mars/utils/Quaternion.h>
 
+#include <../../../../../simulation/mars/sim/src/ptpSoil/PTPInterface.hpp>
+
 namespace mars {
 
   namespace sim {
@@ -778,6 +780,20 @@ namespace mars {
        */
       virtual void positionNode(NodeId id, utils::Vector pos, unsigned long excludeJointId) = 0;
       virtual unsigned long getMaxGroupID() = 0;
+      virtual void pushPTPlist(const int foot_id, sim::PTPInterface* soil) = 0;  //ptp 
+	  virtual bool popPTPlist(const int foot_id) = 0;
+	  virtual sim::VectorN getParticleSize(const int foot_id) = 0;
+      virtual sim::Vector getParticlePosition(const int foot_id, 
+			const int i,const int j, const int k) = 0;
+
+	  virtual bool collideOnSoil(const int foot_id) = 0;
+	  virtual bool setFootPosition(const int foot_id, utils::Vector obj_pos) = 0;
+	  virtual bool setFootVelocity(const int foot_id, utils::Vector obj_vel) = 0;
+	  virtual bool setFootRadius(const int foot_id, double obj_radius) = 0;
+	  virtual utils::Vector getSoilContactForce(const int foot_id) = 0;		
+	  virtual void withDrawDynamicNodes() = 0;		  	
+			
+   
     };
 
   } // end of namespace interfaces

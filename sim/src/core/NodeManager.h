@@ -36,6 +36,8 @@
 #include <mars/interfaces/graphics/GraphicsUpdateInterface.h>
 #include <mars/interfaces/sim/ControlCenter.h>
 #include <mars/interfaces/sim/NodeManagerInterface.h>
+#include <../ptpSoil/PTPInterface.hpp>
+#include <mars/utils/Vector.h>
 
 namespace mars {
   namespace sim {
@@ -103,6 +105,7 @@ namespace mars {
       virtual void setReloadPosition(interfaces::NodeId id, const utils::Vector &pos);
       virtual void setReloadFriction(interfaces::NodeId id, interfaces::sReal friction1,
                                      interfaces::sReal friction2);
+                                     
       virtual void updateDynamicNodes(interfaces::sReal calc_ms, bool physics_thread = true);
       virtual void clearAllNodes(bool clear_all=false);
       virtual void setReloadAngle(interfaces::NodeId id, const utils::sRotation &angle);
@@ -154,8 +157,24 @@ namespace mars {
       virtual void positionNode(interfaces::NodeId id, utils::Vector pos,
                                 unsigned long excludeJointId);
       virtual unsigned long getMaxGroupID() { return maxGroupID; }
-
+      //virtual std::list< PTPInterface > getPTPlist();//ptp
+      virtual void pushPTPlist(const int foot_id, PTPInterface* soil);  //ptp
+	  virtual bool popPTPlist(const int foot_id);
+      virtual VectorN getParticleSize(const int foot_id);
+      virtual Vector getParticlePosition(const int foot_id, const int i,const int j, const int k);
+      
+	  virtual bool collideOnSoil(const int foot_id, bool isMaxForceNow);
+	  virtual bool setFootPosition(const int foot_id, Vector obj_pos);
+	  virtual bool setFootVelocity(const int foot_id, Vector obj_vel);
+	  virtual bool setFootRadius(const int foot_id, double obj_radius);
+	  virtual Vector getSoilContactForce(const int foot_id);
+	  virtual void withdrawDynamicNodes();	  
+	  
+      
     private:
+      std::list< PTPInterface > footsoil[6];   //ptp
+      //TPCore soilsurfaces[6];
+      
       interfaces::NodeId next_node_id;
       bool update_all_nodes;
       int visual_rep;

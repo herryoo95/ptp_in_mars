@@ -60,6 +60,7 @@ include_directories(
                src/interfaces/sensors
                src/physics
                src/sensors
+               src/ptpSoil
 )
 
 
@@ -113,6 +114,12 @@ set(SOURCES_H
        src/sensors/ScanningSonar.h
        
        src/interfaces/sensors/GridSensorInterface.h
+       ####PTP###
+       src/sim/ptpSoil/PTPCore.hpp
+       src/sim/ptpSoil/PTPInterface.hpp
+       src/sim/ptpSoil/PTPUtil.hpp
+       src/sim/ptpSoil/PTPparameters.hpp
+       src/sim/ptpSoil/PTPGraphics.hpp
     )
 
 set(TARGET_SRC
@@ -158,6 +165,13 @@ set(TARGET_SRC
        src/sensors/RaySensor.cpp
 
        src/sensors/ScanningSonar.cpp
+       
+       ####PTP###
+       src/ptpSoil/PTPCore.cpp
+       src/ptpSoil/PTPInterface.cpp
+       src/ptpSoil/PTPUtil.cpp
+       #src/ptpSoil/PTPGraphics.cpp
+
 )
 
 #cmake variables

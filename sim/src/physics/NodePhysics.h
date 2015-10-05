@@ -35,6 +35,7 @@
 #include "WorldPhysics.h"
 
 #include <mars/interfaces/sim/NodeInterface.h>
+#include <stdio.h>
 
 #ifndef ODE11
   #define dTriIndex int
@@ -52,6 +53,7 @@ namespace mars {
       void setZero(){
         num_ground_collisions = 0;
         ray_sensor = 0;
+        height_field = 0;    //20150414 added
         sense_contact_force = 1;
         value = 0;
         c_params.setZero();
@@ -68,6 +70,7 @@ namespace mars {
       bool node1;
       interfaces::contact_params c_params;
       bool ray_sensor;
+      bool height_field;
       bool sense_contact_force;
       interfaces::sReal value;
       dGeomID parent_geom;
@@ -133,8 +136,15 @@ namespace mars {
       void addMassToCompositeBody(dBodyID theBody, dMass *bodyMass);
       void getAbsMass(dMass *pMass) const;
       dReal heightCallback(int x, int y);
+      virtual double getHeightmapHeight(int x, int y);   //ptp
 
     protected:
+    
+    	FILE *fp; 
+		double data[3];
+		char buf[50000];
+		double mls_mean[20000];
+    
       WorldPhysics *theWorld;
       dBodyID nBody;
       dGeomID nGeom;
