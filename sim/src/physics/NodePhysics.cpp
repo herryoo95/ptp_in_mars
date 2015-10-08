@@ -816,6 +816,7 @@ namespace mars {
       size = terrain->width*terrain->height;      
       if(!height_data) height_data = (dReal*)calloc(size, sizeof(dReal));
 
+
 /* origin      
       for(x=0; x<terrain->height; x++) {
         for(y=0; y<terrain->width; y++) {
