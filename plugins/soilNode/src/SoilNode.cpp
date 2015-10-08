@@ -53,7 +53,7 @@ namespace mars {
       void SoilNode::init() {
 		  
 
-/*		
+		
 // heightmap for mls 
 //unvisual surface, it has be be just to call mls height func from DataHeigtht.txt
       control->sim->loadScene("terrain_0_0.scn");  
@@ -61,9 +61,9 @@ namespace mars {
      
       printf("..........%lu.....\n", terrain_id[0]);		     //verify that terrain id is 102 
 
-  */    
+    
   
-  //heightmap for soil model     
+/*  //heightmap for soil model     
 		char file[64];
 		std::string path = configurationPath;
 		
@@ -114,7 +114,7 @@ namespace mars {
       //control->sim->loadScene(path2);   
     //}
   //}	  
-		
+*/		
 	
       }
 

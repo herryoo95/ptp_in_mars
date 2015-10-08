@@ -513,7 +513,8 @@ namespace mars {
       if(control->graphics)
         control->graphics->setDrawObjectMaterial(graphics_id,sNode.material);
     }
-    
+
+/*    
     void SimNode::withdrawCollision() {
  
 //      const Vector NodePhysics::setPosition(const Vector &pos, bool move_group) {
@@ -529,7 +530,7 @@ namespace mars {
 		printf("num+++++++++++++++ \n");			
   
   }
-
+*/
     /**
      * pre:
      *     - interface != 0

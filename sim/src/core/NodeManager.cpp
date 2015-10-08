@@ -1146,7 +1146,8 @@ namespace mars {
     }
 
     // brief withdraw the physics before the collision.
- 
+ /* for ptp force calculation
+  
     void NodeManager::withdrawDynamicNodes() {
       MutexLocker locker(&iMutex);
       NodeMap::iterator iter;
@@ -1154,7 +1155,7 @@ namespace mars {
         iter->second->withdrawCollision();
       }
     }
-
+*/
     /**
      *\brief Updates the Node values of dynamical nodes from the physics.
      */

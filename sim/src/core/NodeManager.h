@@ -168,7 +168,7 @@ namespace mars {
 	  virtual bool setFootVelocity(const int foot_id, Vector obj_vel);
 	  virtual bool setFootRadius(const int foot_id, double obj_radius);
 	  virtual Vector getSoilContactForce(const int foot_id);
-	  virtual void withdrawDynamicNodes();	  
+	//  virtual void withdrawDynamicNodes();	  
 	  
       
     private:
