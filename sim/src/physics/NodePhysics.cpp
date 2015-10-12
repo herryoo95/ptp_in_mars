@@ -895,13 +895,17 @@ namespace mars {
 	int i,j=0;
 
 	fp=fopen("DataHeight.txt", "r"); 
+
+		printf("++++\n");			
 	while(!feof(fp)) 		
 	{
-			fgets(buf, 50, fp);
+
+			fgets(buf, 52, fp);
+		printf("######\n");				
 			//if(buf[0]=='%' || buf[0] == 10) continue;
 			i=0;
 			ptr = strtok( buf, ",");
-			
+		
 			do{
 
 				f = strtod( ptr, &err);
@@ -911,7 +915,7 @@ namespace mars {
 			}while(ptr = strtok(NULL, ","));
 
 			mls_mean[j++] = data[2];
-			//printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j++]);			
+			printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j++]);			
 		
 	}
 
