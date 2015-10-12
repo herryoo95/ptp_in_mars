@@ -142,8 +142,8 @@ namespace mars {
     
     	FILE *fp; 
 		double data[3];
-		char buf[20000];   		//to test mls to height map
-		double mls_mean[50000]; //to test mls to height map
+		char buf[50000];   		//to test mls to height map
+		double mls_mean[20000]; //to test mls to height map
     
       WorldPhysics *theWorld;
       dBodyID nBody;
