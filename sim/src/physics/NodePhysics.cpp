@@ -900,7 +900,7 @@ namespace mars {
 	while(!feof(fp)) 		
 	{
 
-			fgets(buf, 52, fp);
+			fgets(buf, heith*width, fp);
 		printf("######\n");				
 			//if(buf[0]=='%' || buf[0] == 10) continue;
 			i=0;
@@ -915,7 +915,7 @@ namespace mars {
 			}while(ptr = strtok(NULL, ","));
 
 			mls_mean[j++] = data[2];
-			printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j++]);			
+			//printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j++]);			
 		
 	}
 
