@@ -625,12 +625,12 @@ namespace mars {
                   node->ext.x(), node->ext.y(), node->ext.z());
         return false;
       }
-/* 
+/*
 //this code is to test MLS Heightfield object 			
 	char *ptr;
 	char *err;
 	double f;
-	int i,j=0;
+	int j=0;
 
 	fp=fopen("DataHeight.txt", "r"); 
 	while(!feof(fp)) 		
@@ -643,14 +643,11 @@ namespace mars {
 				data[i] = f;
 				i++;
 			}while(ptr = strtok(NULL, ","));
-
 			mls_mean[j++] = data[2];
+			//printf("....mls_mean = %f\n", data[2]);
 	}
-  	  printf("step 0\n"); 	
 	  fclose(fp);						
-  
-  	
-	  
+    
       int count = 0;  
       int x, y;
       int width =140;
@@ -659,27 +656,25 @@ namespace mars {
       node->mesh.vertexcount = width*height;
 	  node->mesh.indexcount = width*height;
 	  
-	  printf("step 1\n");
-      
       myVertices = (dVector3*)calloc(node->mesh.vertexcount, sizeof(dVector3));
       myIndices = (dTriIndex*)calloc(node->mesh.indexcount, sizeof(dTriIndex));
 
-	  printf("step 2\n");
-	        
       for(x=0; x<height; x++) {
+  	  
 	  for(y=0; y<width; y++) {
-		myVertices[x*width+y][0] = (dReal)x;
-        myVertices[x*width+y][1] = (dReal)y;
+		myVertices[x*width+y][0] = (dReal)x*0.1;
+        myVertices[x*width+y][1] = (dReal)y*0.1;
         myVertices[x*width+y][2] = (dReal)mls_mean[x*width+y];
-      }}
+   //std::cout << "[" << myVertices[x*width+y][0] << "," << myVertices[x*width+y][1] 
+   //<< "," << myVertices[x*width+y][2] << "]" << std::endl;	  
+         }  
+      }
       
-      printf("step 3\n");
-
       for(i=0; i<width*height; i++) {
         myIndices[i] = (dTriIndex)i;
       }
-
 */
+
       myVertices = (dVector3*)calloc(node->mesh.vertexcount, sizeof(dVector3));
       myIndices = (dTriIndex*)calloc(node->mesh.indexcount, sizeof(dTriIndex));
       //LOG_DEBUG("%d %d", node->mesh.vertexcount, node->mesh.indexcount);
@@ -689,18 +684,20 @@ namespace mars {
         myVertices[i][0] = (dReal)node->mesh.vertices[i][0];
         myVertices[i][1] = (dReal)node->mesh.vertices[i][1];
         myVertices[i][2] = (dReal)node->mesh.vertices[i][2];
+   std::cout << "[" << myVertices[i][0] << "," << myVertices[i][1] 
+   << "," << myVertices[i][2] << "]" << std::endl;	        
       }
       for(i=0; i<node->mesh.indexcount; i++) {
         myIndices[i] = (dTriIndex)node->mesh.indices[i];
        
       }
 
-        std::cout << "in_count" << (dReal)node->mesh.indexcount << "," << " vert_count" 
-                                << (dReal)node->mesh.vertexcount << std::endl;      
-        std::cout << "(" << myIndices[0] << "," << myIndices[1] << "," << myIndices[2] << ")" << std::endl;
-        std::cout << "(" << myIndices[3] << "," << myIndices[4] << "," << myIndices[5] << ")" << std::endl; 
-        std::cout << "(" << myIndices[node->mesh.vertexcount-3] << "," << myIndices[node->mesh.vertexcount-2] << "," 
-                         << myIndices[node->mesh.vertexcount-1] << ")" << std::endl;         
+        //std::cout << "in_count" << (dReal)node->mesh.indexcount << "," << " vert_count" 
+                                //<< (dReal)node->mesh.vertexcount << std::endl;      
+        //std::cout << "(" << myIndices[0] << "," << myIndices[1] << "," << myIndices[2] << ")" << std::endl;
+        //std::cout << "(" << myIndices[3] << "," << myIndices[4] << "," << myIndices[5] << ")" << std::endl; 
+        //std::cout << "(" << myIndices[node->mesh.vertexcount-3] << "," << myIndices[node->mesh.vertexcount-2] << "," 
+                         //<< myIndices[node->mesh.vertexcount-1] << ")" << std::endl;         
 
       // then we can build the ode representation
       myTriMeshData = dGeomTriMeshDataCreate();
@@ -873,21 +870,21 @@ namespace mars {
       terrain = node->terrain;
       
 
-      terrain->height =140;  //this is to test MLS heightfield
-      terrain->width =140;   //this is to test MLS heightfield   
+    //  terrain->height =140;  //this is to test MLS heightfield
+    //  terrain->width =140;   //this is to test MLS heightfield   
      
       size = terrain->width*terrain->height;      
       if(!height_data) height_data = (dReal*)calloc(size, sizeof(dReal));
 
 
 // original code      
-      //for(x=0; x<terrain->height; x++) {
-        //for(y=0; y<terrain->width; y++) {
-          //height_data[(terrain->height-(x+1))*terrain->width+y] = (dReal)terrain->pixelData[x*terrain->width+y];
-        //}
-      //}
+      for(x=0; x<terrain->height; x++) {
+        for(y=0; y<terrain->width; y++) {
+          height_data[(terrain->height-(x+1))*terrain->width+y] = (dReal)terrain->pixelData[x*terrain->width+y];
+        }
+      }
 
-
+/*
 //this code is to test MLS Heightfield object 	
 
     
@@ -936,7 +933,7 @@ namespace mars {
   
    
 // unitl here the test code is    
- 
+*/ 
 
       // build the ode representation
       dHeightfieldDataID heightid = dGeomHeightfieldDataCreate();
@@ -1442,8 +1439,8 @@ namespace mars {
 
     dReal NodePhysics::heightCallback(int x, int y) {
 	
-		terrain->width =140;	//this is to test mls heightfield  
-		terrain->scale = 1;		//this is to test mls heightfield  
+		//terrain->width =140;	//this is to test mls heightfield  
+		//terrain->scale = 1;		//this is to test mls heightfield  
 	
       return (dReal)height_data[y*terrain->width+x]*terrain->scale;
     }

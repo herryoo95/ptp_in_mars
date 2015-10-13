@@ -56,8 +56,8 @@ namespace mars {
 		
 // heightmap for mls 
 //unvisual surface, it has be be just to call mls height func from DataHeigtht.txt
-//      control->sim->loadScene("dlr.scn");  
-      control->sim->loadScene("terrain_0_0.scn");        
+      control->sim->loadScene("dlr.scn");  
+ //     control->sim->loadScene("terrain_0_0.scn");        
  //     terrain_id[0] = control->nodes->getID("terrain_0_0") + 1;  //heightmap ID = 102, then it has normal collision
      
  //     printf("..........%lu.....\n", terrain_id[0]);		     //verify that terrain id is 102 
