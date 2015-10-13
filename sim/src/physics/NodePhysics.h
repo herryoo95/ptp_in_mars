@@ -36,6 +36,8 @@
 
 #include <mars/interfaces/sim/NodeInterface.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>     /* strtod */
 
 #ifndef ODE11
   #define dTriIndex int
@@ -142,8 +144,8 @@ namespace mars {
     
     	FILE *fp; 
 		double data[3];
-		char buf[50000];   		//to test mls to height map
-		double mls_mean[20000]; //to test mls to height map
+		char buf[500];   		//to test mls to height map
+		double mls_mean[25000]; //to test mls to height map	
     
       WorldPhysics *theWorld;
       dBodyID nBody;

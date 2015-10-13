@@ -614,7 +614,7 @@ namespace mars {
      *
      */
     bool NodePhysics::createMesh(NodeData* node) {
-      //int i;
+      int i;
 
       if (!node->inertia_set && 
           (node->ext.x() <= 0 || node->ext.y() <= 0 || node->ext.z() <= 0)) {
@@ -625,7 +625,7 @@ namespace mars {
                   node->ext.x(), node->ext.y(), node->ext.z());
         return false;
       }
- 
+/* 
 //this code is to test MLS Heightfield object 			
 	char *ptr;
 	char *err;
@@ -635,16 +635,16 @@ namespace mars {
 	fp=fopen("DataHeight.txt", "r"); 
 	while(!feof(fp)) 		
 	{
-			//fgets(buf, 50, fp);
-			//i=0;
-			//ptr = strtok( buf, ",");
-			//do{
-				//f = strtod( ptr, &err);
-				//data[i] = f;
-				//i++;
-			//}while(ptr = strtok(NULL, ","));
+			fgets(buf, 50, fp);
+			i=0;
+			ptr = strtok( buf, ",");
+			do{
+				f = strtod( ptr, &err);
+				data[i] = f;
+				i++;
+			}while(ptr = strtok(NULL, ","));
 
-			//mls_mean[j++] = data[2];
+			mls_mean[j++] = data[2];
 	}
   	  printf("step 0\n"); 	
 	  fclose(fp);						
@@ -679,7 +679,7 @@ namespace mars {
         myIndices[i] = (dTriIndex)i;
       }
 
-/*
+*/
       myVertices = (dVector3*)calloc(node->mesh.vertexcount, sizeof(dVector3));
       myIndices = (dTriIndex*)calloc(node->mesh.indexcount, sizeof(dTriIndex));
       //LOG_DEBUG("%d %d", node->mesh.vertexcount, node->mesh.indexcount);
@@ -694,7 +694,7 @@ namespace mars {
         myIndices[i] = (dTriIndex)node->mesh.indices[i];
        
       }
-*/
+
         std::cout << "in_count" << (dReal)node->mesh.indexcount << "," << " vert_count" 
                                 << (dReal)node->mesh.vertexcount << std::endl;      
         std::cout << "(" << myIndices[0] << "," << myIndices[1] << "," << myIndices[2] << ")" << std::endl;
@@ -888,21 +888,20 @@ namespace mars {
       //}
 
 
-//this code is to test MLS Heightfield object 			
+//this code is to test MLS Heightfield object 	
+
+    
 	char *ptr;
 	char *err;
 	double f;
 	int i,j=0;
 
-	fp=fopen("DataHeight.txt", "r"); 
 
-		printf("++++\n");			
+	fp=fopen("DataHeight.txt", "r"); 
 	while(!feof(fp)) 		
 	{
 
-			fgets(buf, heith*width, fp);
-		printf("######\n");				
-			//if(buf[0]=='%' || buf[0] == 10) continue;
+			fgets(buf, 50, fp);
 			i=0;
 			ptr = strtok( buf, ",");
 		
@@ -910,16 +909,16 @@ namespace mars {
 
 				f = strtod( ptr, &err);
 				data[i] = f;
-				//printf("%f %s\t",f,err);
 				i++;
 			}while(ptr = strtok(NULL, ","));
 
-			mls_mean[j++] = data[2];
-			//printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j++]);			
+			mls_mean[j] = data[2];
+		//	printf("(%d,%d,%f)\n", (int)data[0],(int)data[1],mls_mean[j]);	
+			j++;
 		
 	}
 
-		fclose(fp);				
+	fclose(fp);				
 
       int count = 0;
 
@@ -930,7 +929,7 @@ namespace mars {
           
           height_data[(terrain->height-(x+1))*terrain->width+y] = mls_mean[x*terrain->width+(terrain->width-y)];          
           //printf("++(%d %d)###",x*terrain->width+y, count);  
-          count++;
+          //count++;
 
         }
       }  
