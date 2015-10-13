@@ -736,8 +736,8 @@ namespace mars {
                   node->ext.x(), node->ext.y(), node->ext.z());
         return false;
       }
-
-      // build the ode representation
+      
+     // build the ode representation
       nGeom = dCreateBox(theWorld->getSpace(), (dReal)(node->ext.x()),
                          (dReal)(node->ext.y()), (dReal)(node->ext.z()));
 
@@ -753,7 +753,8 @@ namespace mars {
         dReal tempMass =(dReal)(node->mass);
         dMassSetBoxTotal(&nMass, tempMass, (dReal)(node->ext.x()),
                          (dReal)(node->ext.y()),(dReal)(node->ext.z()));
-      }
+      }   
+     
       return true;
     }
 

@@ -199,6 +199,9 @@ namespace mars {
           simNodesDyn[nodeS->index] = newNode;
         iMutex.unlock();
         control->sim->sceneHasChanged(false);
+        
+        //control->graphics = false;
+        
         if(control->graphics) {
           NodeId id = control->graphics->addDrawObject(*nodeS, visual_rep & 1);
           if(id) newNode->setGraphicsID(id);
