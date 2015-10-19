@@ -41,6 +41,9 @@
 #include <mars/cfg_manager/CFGManagerInterface.h>
 
 #include <string>
+#include <stdio.h>
+
+#include <time.h>
 
 namespace mars {
 
@@ -85,10 +88,13 @@ namespace mars {
       private:
         cfg_manager::cfgPropertyStruct example;
         
-            	FILE *fp; 
+        FILE *fp; 
 		double data[3];
 		char buf[500];   		//to test mls to height map
 		double mls_mean[25000]; //to test mls to height map	
+		unsigned long obj_id;	
+		
+		clock_t before;
         
 
       }; // end of class definition BoxMls

@@ -56,17 +56,52 @@ namespace mars {
 		
 // heightmap for mls 
 //unvisual surface, it has be be just to call mls height func from DataHeigtht.txt
-		control->sim->loadScene("box.scn");  
-		printf("+++box_id = %lu\n", control->nodes->getID("box"));
+	//	control->sim->loadScene("box.scn");  
+	//	printf("+++box_id = %lu\n", control->nodes->getID("box"));
   //    control->sim->loadScene("dlr.scn");  
  //     control->sim->loadScene("terrain_0_0.scn");        
  //     terrain_id[0] = control->nodes->getID("terrain_0_0") + 1;  //heightmap ID = 102, then it has normal collision
      
  //     printf("..........%lu.....\n", terrain_id[0]);		     //verify that terrain id is 102 
 
+//rotation test of heightmap
+		char file[64];
+		std::string path = configurationPath;
+		
+		Vector pos;		
+		
+      sprintf(file, "../rimres_env/heightmaps/terrain_%d_%d.scn", 0, 0);
+      path = configurationPath;	
+      path.append(file);
+      control->sim->loadScene(path);  
     
-  
-/*  //heightmap for soil model     
+      terrain_id[0] = control->nodes->getID("terrain_0_0");
+      printf("..........%lu.....\n", terrain_id[0]);
+      pos = control->nodes->getPosition(terrain_id[0]);
+      printf("heightmap pos (%f %f %f)\n", pos.x(), pos.y(), pos.z());  
+      
+      sprintf(file, "../rimres_env/heightmaps/terrain_%d_%d.scn", 0, 0);
+      path = configurationPath;
+      path.append(file);
+      control->sim->loadScene(path); 
+      terrain_id[1] = control->nodes->getID("terrain_0_0") + 1;      
+	  control->nodes->setPosition(terrain_id[1], pos); 
+      printf("..........%lu.....\n", terrain_id[1]);	  
+      pos = control->nodes->getPosition(terrain_id[1]);	  
+      printf("heightmap pos (%f %f %f)\n", pos.x(), pos.y(), pos.z()); 
+      
+       sprintf(file, "../rimres_env/heightmaps/terrain_%d_%d.scn", 0, 0);
+      path = configurationPath;
+      path.append(file);
+      control->sim->loadScene(path); 
+      terrain_id[1] = control->nodes->getID("terrain_0_0") + 2;      
+	  control->nodes->setPosition(terrain_id[1], pos); 
+      printf("..........%lu.....\n", terrain_id[1]);	  
+      pos = control->nodes->getPosition(terrain_id[1]);	  
+      printf("heightmap pos (%f %f %f)\n", pos.x(), pos.y(), pos.z());                  
+      
+/*  
+  //heightmap for soil model     
 		char file[64];
 		std::string path = configurationPath;
 		
@@ -80,9 +115,8 @@ namespace mars {
       terrain_id[0] = control->nodes->getID("terrain_0_0");
       printf("..........%lu.....\n", terrain_id[0]);
       pos = control->nodes->getPosition(terrain_id[0]);
-      //pos = control->nodes->getPosition(102);
       printf("heightmap pos (%f %f %f)\n", pos.x(), pos.y(), pos.z());    
-      pos.z() = pos.z() - 0.1f;
+  //    pos.z() = pos.z() - 0.1f;
 
      
       sprintf(file, "../rimres_env_bottom/heightmaps/terrain_%d_%d.scn", 0, 0);
@@ -92,9 +126,7 @@ namespace mars {
       terrain_id[1] = control->nodes->getID("terrain_0_0") + 1;      
 	  control->nodes->setPosition(terrain_id[1], pos); 
       printf("..........%lu.....\n", terrain_id[1]);	  
-	  //control->nodes->setPosition(103, pos);  
       pos = control->nodes->getPosition(terrain_id[1]);	  
-      //pos = control->nodes->getPosition(103);
       printf("heightmap pos (%f %f %f)\n", pos.x(), pos.y(), pos.z());  
       
       control->sim->switchPluginUpdateMode(PLUGIN_GUI_MODE, this);

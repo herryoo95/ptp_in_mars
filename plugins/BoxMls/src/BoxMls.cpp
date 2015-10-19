@@ -79,8 +79,10 @@ namespace mars {
     
       int count = 0;  
       int x, y;
-      int width =140;
+      int width =1;
       int height =140;
+
+
    
   for(x=0; x<height; x++) {
   for(y=0; y<width; y++) {
@@ -90,14 +92,14 @@ namespace mars {
 
         const std::string name = "box" + boost::lexical_cast<string>(x*width+y);
           
-		node->pos.x() = (double)x*0.1;
+		node->pos.x() = (double)x*0.1-7.f;
 		node->pos.y() = (double)y*0.1;		
         node->pos.z() = (double)mls_mean[x*width+y]-(double)2;
         
        node->name = name;
-       node->movable = true;
+       node->movable = false;
        node->physicMode = NODE_TYPE_BOX;
-       node->index=0;
+       node->index=x*width+y;
        node->noPhysical = false;
        node->inertia_set=true;
 		node->ext.x() = (double)0.1;       
@@ -111,6 +113,11 @@ namespace mars {
   }  
   }
 
+	  control->sim->loadScene("sphere.scn");  
+      obj_id = control->nodes->getID("sphereFoot");
+      printf("..........%lu.....\n", obj_id);
+      
+      before = clock();
 
       }
 
@@ -123,7 +130,19 @@ namespace mars {
 
       void BoxMls::update(sReal time_ms) {
 
-        // control->motors->setMotorValue(id, value);
+	  Vector pos;
+      pos = control->nodes->getPosition(obj_id);
+	  printf("current pos = (%f, %f, %f)\n", pos.x(),pos.y(),pos.z());
+	  
+
+
+double result;
+
+result = (double)(clock() - before) / (CLOCKS_PER_SEC/1000.f);
+
+before = clock();
+printf("걸린시간은 %5.2f 입니다.n", result); 	  
+	    
       }
 
       void BoxMls::receiveData(const data_broker::DataInfo& info,

@@ -142,10 +142,10 @@ namespace mars {
 
     protected:
     
-    	FILE *fp; 
-		double data[3];
-		char buf[500];   		//to test mls to height map
-		double mls_mean[25000]; //to test mls to height map	
+    	//FILE *fp; 
+		//double data[3];
+		//char buf[500];   		//to test mls to height map
+		//double mls_mean[25000]; //to test mls to height map	
     
       WorldPhysics *theWorld;
       dBodyID nBody;

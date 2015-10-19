@@ -200,7 +200,7 @@ namespace mars {
         iMutex.unlock();
         control->sim->sceneHasChanged(false);
         
-        //control->graphics = false;
+       control->graphics = false;
         
         if(control->graphics) {
           NodeId id = control->graphics->addDrawObject(*nodeS, visual_rep & 1);

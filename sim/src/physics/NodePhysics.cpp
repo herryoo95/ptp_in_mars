@@ -684,8 +684,6 @@ namespace mars {
         myVertices[i][0] = (dReal)node->mesh.vertices[i][0];
         myVertices[i][1] = (dReal)node->mesh.vertices[i][1];
         myVertices[i][2] = (dReal)node->mesh.vertices[i][2];
-   std::cout << "[" << myVertices[i][0] << "," << myVertices[i][1] 
-   << "," << myVertices[i][2] << "]" << std::endl;	        
       }
       for(i=0; i<node->mesh.indexcount; i++) {
         myIndices[i] = (dTriIndex)node->mesh.indices[i];
